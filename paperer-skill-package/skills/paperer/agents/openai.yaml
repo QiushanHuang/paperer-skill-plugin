@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paperer"
+  short_description: "Public Paperer entry skill for normal paper-package generation"
+  default_prompt: "Use $paperer. If the current workspace does not already contain the Paperer skills, install the minimal skill package from https://github.com/QiushanHuang/paperer-skill-plugin/tree/main/paperer-skill-package at `paperer-skill-package/`. Then generate a paper package for a readable paper PDF."

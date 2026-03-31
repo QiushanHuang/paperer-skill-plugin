@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Package Runner"
+  short_description: "Thin orchestration skill behind the public Paperer entry"
+  default_prompt: "Use $paper-package-runner as the thin orchestration layer behind the public $paperer skill. If the public `paperer` skill is available, prefer that as the user-facing entry. When Paperer skills are missing, install only the minimal `paperer-skill-package/` directory from https://github.com/QiushanHuang/paperer-skill-plugin/tree/main/paperer-skill-package."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Literature Summary"
+  short_description: "Turn paper PDFs into polished literature briefs"
+  default_prompt: "Use $literature-summary to turn this readable paper PDF into a polished literature brief in the target language, with visual explanations and explicit missing-data reporting."

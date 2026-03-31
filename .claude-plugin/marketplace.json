@@ -1,0 +1,19 @@
+{
+  "name": "paperer-skill-plugin-dev",
+  "description": "Development marketplace for the Paperer skill plugin",
+  "owner": {
+    "name": "Qiushan Huang"
+  },
+  "plugins": [
+    {
+      "name": "paperer-skill-plugin",
+      "description": "Cross-platform Paperer skill bundle for readable paper PDFs",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "Qiushan Huang"
+      }
+    }
+  ]
+}
+

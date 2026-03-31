@@ -1,0 +1,8 @@
+{
+  "name": "paperer-skill-plugin",
+  "version": "0.1.0",
+  "description": "Cross-platform Paperer skill plugin for Codex, Claude Code, and OpenCode",
+  "type": "module",
+  "main": ".opencode/plugins/paperer-skill-plugin.js"
+}
+

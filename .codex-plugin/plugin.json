@@ -1,0 +1,38 @@
+{
+  "name": "paperer-skill-plugin",
+  "version": "0.1.0",
+  "description": "Cross-platform Paperer skill bundle for readable paper PDFs",
+  "author": {
+    "name": "Qiushan Huang",
+    "url": "https://github.com/QiushanHuang"
+  },
+  "homepage": "https://github.com/QiushanHuang/paperer-skill-plugin",
+  "repository": "https://github.com/QiushanHuang/paperer-skill-plugin",
+  "keywords": [
+    "paperer",
+    "skills",
+    "papers",
+    "research",
+    "pdf"
+  ],
+  "skills": "./paperer-skill-package/skills/",
+  "interface": {
+    "displayName": "Paperer",
+    "shortDescription": "Generate paper packages from readable research PDFs",
+    "longDescription": "Paperer turns a readable research PDF into a structured paper package with summary, extraction report, manifest, and visual assets.",
+    "developerName": "Qiushan Huang",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write",
+      "Files"
+    ],
+    "websiteURL": "https://github.com/QiushanHuang/paperer-skill-plugin",
+    "defaultPrompt": [
+      "Use Paperer to generate a paper package for this readable paper PDF.",
+      "Use Paperer to summarize this paper and extract figures, tables, and formulas.",
+      "Use Paperer on this PDF and return the output directory, summary, and report paths."
+    ]
+  }
+}
+

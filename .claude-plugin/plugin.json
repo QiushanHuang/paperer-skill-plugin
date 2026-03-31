@@ -1,0 +1,19 @@
+{
+  "name": "paperer-skill-plugin",
+  "description": "Cross-platform Paperer skill bundle for readable paper PDFs",
+  "version": "0.1.0",
+  "author": {
+    "name": "Qiushan Huang",
+    "url": "https://github.com/QiushanHuang"
+  },
+  "homepage": "https://github.com/QiushanHuang/paperer-skill-plugin",
+  "repository": "https://github.com/QiushanHuang/paperer-skill-plugin",
+  "keywords": [
+    "paperer",
+    "skills",
+    "papers",
+    "research",
+    "pdf"
+  ]
+}
+

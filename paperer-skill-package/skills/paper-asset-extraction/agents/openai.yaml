@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Asset Extraction"
+  short_description: "Extract figures, tables, and formulas from papers"
+  default_prompt: "Use $paper-asset-extraction to extract figures, tables, and formulas from this readable paper PDF into a conservative asset bundle with a manifest and explicit quality flags."

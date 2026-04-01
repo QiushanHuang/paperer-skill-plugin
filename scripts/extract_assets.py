@@ -225,7 +225,7 @@ def _is_hidden_formula(el: dict) -> bool:
 def classify_elements(elements: list[dict]) -> dict[str, list[dict]]:
     captions = _build_caption_index(elements)
     # Collect ids of elements already typed as formula to avoid double-counting
-    formula_ids = {el.get("id") for el in elements if el.get("type", "").lower() == "formula"}
+    formula_ids = {el.get("id") for el in elements if el.get("type", "").lower() == "formula" and el.get("id") is not None}
 
     out: dict[str, list[dict]] = {
         "figures": [],
@@ -430,16 +430,29 @@ def process_asset_type(
             seq += 1
 
     entries: list[dict] = []
+    emitted_ids: dict[str, int] = {}  # track how many times each base id has been emitted
     for c in candidates:
         n = c["paper_number"]
-        filename = f"{prefix}-{n:03d}.png"
+        base_id = f"{prefix}-{n:03d}"
+
+        # Prevent filename collisions when duplicate numbers exist
+        if base_id in emitted_ids:
+            emitted_ids[base_id] += 1
+            asset_id = f"{base_id}-dup{emitted_ids[base_id]}"
+        else:
+            emitted_ids[base_id] = 0
+            asset_id = base_id
+
+        filename = f"{asset_id}.png"
         out_path = asset_dir / filename
         rel_path = f"assets/{dir_name}/{filename}"
 
         flags = crop_region(doc, c["page"], c["bbox"], out_path, dpi, margin)
+        if base_id != asset_id:
+            flags.append("duplicate_number")
 
         entries.append({
-            "id": f"{prefix}-{n:03d}",
+            "id": asset_id,
             "type": asset_type,
             "page": c["page"],
             "path": rel_path,

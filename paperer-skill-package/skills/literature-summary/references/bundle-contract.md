@@ -63,6 +63,7 @@ At minimum include:
 - `unreadable_regions`
 - `notes`
 - `errors`
+- `ratings` — structured paper evaluation with five dimensions: `novelty`, `rigor`, `practicality`, `clarity`, `impact`. Each contains `score` (1–5) and `justification` (one sentence).
 
 Suggested `status` values:
 

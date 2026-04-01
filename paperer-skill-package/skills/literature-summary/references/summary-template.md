@@ -174,6 +174,44 @@ Do not summarize extraction problems here. If the bundle has extraction uncertai
 
 - Close with one natural, precise, and defensible sentence.
 
+## Paper Ratings
+
+After completing the summary, produce a structured rating for the paper across five dimensions. Each rating is an integer from 1 to 5. Each rating must include a one-sentence justification grounded in the paper's actual content — do not repeat generic praise or criticism.
+
+Write the ratings into `report.json` under the `ratings` key. Do not include the ratings in `summary.md` itself — they are structured data for downstream consumption (e.g., publish skill, recommendation system).
+
+### Dimensions
+
+| Dimension | Key | What to evaluate |
+|-----------|-----|-----------------|
+| 创新性 | `novelty` | Is the core idea genuinely new, or an incremental extension? Does it open a new direction or reframe an existing problem? |
+| 严谨性 | `rigor` | Are experiments well-designed with strong baselines, ablations, and statistical rigor? Are claims supported by evidence? |
+| 实用性 | `practicality` | Can practitioners adopt this work? Is the method reproducible, the code available, and the computational cost reasonable? |
+| 清晰度 | `clarity` | Is the paper well-written? Are figures informative, notation consistent, and the argument easy to follow? |
+| 影响力 | `impact` | How significant is the potential influence on the field? Does it change how people think or work? |
+
+### Rating scale
+
+- **5** — Exceptional, among the best in this area
+- **4** — Strong, clearly above average
+- **3** — Solid, meets expectations
+- **2** — Below average, notable weaknesses
+- **1** — Weak, fundamental issues
+
+### `report.json` format
+
+```json
+{
+  "ratings": {
+    "novelty":      { "score": 4, "justification": "..." },
+    "rigor":        { "score": 4, "justification": "..." },
+    "practicality": { "score": 5, "justification": "..." },
+    "clarity":      { "score": 3, "justification": "..." },
+    "impact":       { "score": 4, "justification": "..." }
+  }
+}
+```
+
 ## Tone guide
 
 Target tone:

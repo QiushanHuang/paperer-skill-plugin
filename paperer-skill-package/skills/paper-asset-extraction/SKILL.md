@@ -50,7 +50,7 @@ Then run:
 <python> -c "import opendataloader_pdf; import fitz; print('deps ok')"
 ```
 
-- If it prints `deps ok`, use the **preferred path** below. Use the same `<python>` to invoke `scripts/extract_assets.py`.
+- If it prints `deps ok`, use the **preferred path** below. Use the same `<python>` to invoke `scripts/extract_assets.py`. The script will auto-start the hybrid server if needed.
 - If it fails, try `bash scripts/install_deps.sh` (from the repo root) and re-check.
 - If installation fails or Java 11+ is unavailable (`java -version`), use the **fallback path**.
 
@@ -66,7 +66,7 @@ When `scripts/extract_assets.py` and its dependencies (`opendataloader-pdf`, `py
    ```
    .venv/bin/python scripts/extract_assets.py <paper.pdf> --output-root <output_root> --paper-slug <slug>
    ```
-   Hybrid mode (`docling-fast`) is **enabled by default** for better formula and complex-table detection. If the hybrid server (`opendataloader-pdf-hybrid --port 5002`) is not running, the script falls back to local mode automatically. Use `--no-hybrid` to force local-only processing.
+   Hybrid mode (`docling-fast`) is **enabled by default** and **required** for reliable figure, formula, and table detection. If the hybrid server is not running, the script will attempt to auto-start it (`opendataloader-pdf-hybrid --port 5002`) and retry. If auto-start fails, the script exits with an error — it does **not** fall back to local mode, as local mode produces significantly degraded results (missed figures, incomplete tables). Use `--no-hybrid` only for debugging.
 
 2. The script produces:
    - `assets/header/paper-header.png`

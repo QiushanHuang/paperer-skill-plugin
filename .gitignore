@@ -17,3 +17,4 @@ test-pdfs/
 
 # Node
 node_modules/
+.superpowers/

@@ -14,10 +14,15 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
 import re
+import shutil
+import signal
+import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 try:
@@ -141,6 +146,75 @@ def extract_number(text: str, patterns: list[str]) -> int | None:
 # ---------------------------------------------------------------------------
 
 
+_hybrid_proc: subprocess.Popen | None = None
+
+
+def _cleanup_hybrid_server() -> None:
+    global _hybrid_proc
+    if _hybrid_proc is not None:
+        _hybrid_proc.terminate()
+        try:
+            _hybrid_proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            _hybrid_proc.kill()
+        _hybrid_proc = None
+
+
+atexit.register(_cleanup_hybrid_server)
+
+
+def _try_start_hybrid_server(port: int = 5002, timeout: float = 30) -> bool:
+    """Attempt to start the hybrid server and wait until it's ready."""
+    global _hybrid_proc
+
+    cmd = shutil.which("opendataloader-pdf-hybrid")
+    if cmd is None:
+        # Also check inside the project venv
+        venv_cmd = Path(".venv/bin/opendataloader-pdf-hybrid")
+        if venv_cmd.exists():
+            cmd = str(venv_cmd)
+        else:
+            print("[extract] opendataloader-pdf-hybrid not found on PATH or in .venv")
+            return False
+
+    print(f"[extract] Starting hybrid server on port {port} …")
+    try:
+        _hybrid_proc = subprocess.Popen(
+            [cmd, "--port", str(port)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except OSError as exc:
+        print(f"[extract] Failed to start hybrid server: {exc}")
+        return False
+
+    # Poll until the server is reachable or we time out.
+    # The server may return 404 on "/" but that still means it's up and listening.
+    import urllib.error
+    import urllib.request
+    url = f"http://localhost:{port}/"
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if _hybrid_proc.poll() is not None:
+            print("[extract] Hybrid server exited unexpectedly")
+            _hybrid_proc = None
+            return False
+        try:
+            urllib.request.urlopen(url, timeout=2)
+            print("[extract] Hybrid server is ready")
+            return True
+        except urllib.error.HTTPError:
+            # Any HTTP response (even 404) means the server is up
+            print("[extract] Hybrid server is ready")
+            return True
+        except Exception:
+            time.sleep(1)
+
+    print(f"[extract] Hybrid server did not become ready within {timeout}s")
+    _cleanup_hybrid_server()
+    return False
+
+
 def run_opendataloader(
     pdf_path: Path,
     work_dir: Path,
@@ -159,10 +233,18 @@ def run_opendataloader(
         opendataloader_pdf.convert(**kwargs)
     except Exception as exc:
         if hybrid:
-            print(f"[extract] Hybrid mode ({hybrid}) unavailable: {exc}")
-            print("[extract] Falling back to local mode …")
-            kwargs.pop("hybrid", None)
-            opendataloader_pdf.convert(**kwargs)
+            print(f"[extract] Hybrid mode ({hybrid}) failed: {exc}")
+            # Try to auto-start the hybrid server and retry
+            if _try_start_hybrid_server():
+                print("[extract] Retrying with hybrid mode …")
+                opendataloader_pdf.convert(**kwargs)
+            else:
+                sys.exit(
+                    f"[extract] ERROR: hybrid server could not be started. "
+                    f"Please start it manually:\n"
+                    f"  opendataloader-pdf-hybrid --port 5002\n"
+                    f"Then re-run extraction."
+                )
         else:
             raise
 

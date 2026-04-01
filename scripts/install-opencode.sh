@@ -10,5 +10,8 @@ mkdir -p "$HOME/.config/opencode/skills"
 ln -sfn "$SKILLS_DIR" "$TARGET_DIR"
 
 echo "Installed OpenCode skills at $TARGET_DIR"
+
+"$SCRIPT_DIR/install_deps.sh"
+
 echo "Restart OpenCode to discover Paperer."
 

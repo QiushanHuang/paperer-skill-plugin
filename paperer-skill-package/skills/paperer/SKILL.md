@@ -16,6 +16,7 @@ Start here when the user says "use Paperer skill". Do not start from maintainer 
    - `paper-package-runner`
    - `literature-summary`
    - `paper-asset-extraction`
+   - `publish`
 2. If they are already available, fetch nothing.
 3. If they are not available, install only the minimal skill package from:
    - `https://github.com/QiushanHuang/paperer-skill-plugin/tree/main/paperer-skill-package`
@@ -53,9 +54,11 @@ Optional:
 1. Use `paper-package-runner` as the thin orchestration skill behind this public entry.
 2. Let `paper-package-runner` route the run to `literature-summary`.
 3. Require `literature-summary` to prefer `paper-asset-extraction` as the visual-asset pipeline.
-4. Return:
+4. After `summary.md` is produced, let `paper-package-runner` call `publish` to generate a Distill.pub-style HTML report (`summary-report.html`). The HTML step is best-effort; a missing report does not downgrade the run status.
+5. Return:
    - the output directory path
    - the path to `summary.md`
+   - the path to `summary-report.html` when present
    - the path to `report.json`
    - the path to `manifest.json` when present
    - the final status: `complete`, `partial`, or `failed`
@@ -67,6 +70,7 @@ paperer
   -> paper-package-runner
      -> literature-summary
         -> paper-asset-extraction
+     -> publish (summary.md -> summary-report.html)
   -> output/papers/<paper-slug>/
 ```
 

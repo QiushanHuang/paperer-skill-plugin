@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(git rev-parse --show-toplevel 2>/dev/null || echo $HOME/plugins/paperer-skill-plugin)/hooks/session-start\"",
+            "statusMessage": "Checking Paperer dependencies"
+          }
+        ]
+      }
+    ]
+  }
+}

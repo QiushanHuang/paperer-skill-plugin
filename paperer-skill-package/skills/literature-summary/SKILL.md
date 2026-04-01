@@ -114,6 +114,7 @@ Before finishing, confirm:
 - manifest-level quality flags are reflected in the prose and `report.json`
 - extraction-process details stay in `report.json`, not in the main summary prose
 - `report.json` matches the actual completeness of the bundle
+- `summary.md` uses standard Markdown syntax (headings, images, footnotes, math delimiters) so that the downstream `publish` skill can convert it cleanly into an HTML report
 
 ## Common Mistakes
 

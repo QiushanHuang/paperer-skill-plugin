@@ -1,2 +1,19 @@
+# macOS
 .DS_Store
 
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Generated output
+output/
+
+# Test PDFs (large binary files)
+test-pdfs/
+
+# Node
+node_modules/

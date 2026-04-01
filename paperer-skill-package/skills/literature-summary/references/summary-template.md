@@ -127,10 +127,12 @@ The header screenshot must be embedded directly in the Markdown, not only descri
 
 #### 5.3 公式解读
 
-- Embed each core formula first, then explain it in complete sentences.
+- **Always rewrite formulas in LaTeX** using `$$...$$` (display) or `$...$` (inline) delimiters. Do not embed formula PNG screenshots (`![Formula N](assets/formulas/...)`) as the primary representation — PNG crops are unreliable and cannot be rendered cleanly downstream.
+- Use the formula PNG screenshots in `assets/formulas/` only as a **visual reference** to verify your LaTeX transcription against the original paper. Do not embed them in `summary.md`.
+- After each LaTeX formula block, explain it in complete sentences.
 - Explain what the formula does instead of merely rewriting symbols.
 - If there are many formulas, prioritize the core ones and explain their variable meaning when needed.
-- If a formula cannot be explained reliably from the paper, mark that clearly and do not force an interpretation.
+- If a formula cannot be transcribed reliably into LaTeX from the paper, mark that clearly, provide a best-effort LaTeX approximation, and note the uncertainty. Do not force an interpretation.
 
 Do not summarize extraction problems here. If the bundle has extraction uncertainty, keep that in `report.json` unless it materially changes what the paper itself can support.
 

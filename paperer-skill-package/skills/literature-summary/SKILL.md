@@ -70,9 +70,10 @@ If this skill is called from `paper-package-runner`, accept the wrapper's derive
    - follow the selected language
    - read like a professional research brief
    - treat each template bullet as a compact coverage prompt and answer it in polished prose
-   - embed the header image and every available figure, table, and formula directly in the Markdown
+   - embed the header image and every available figure and table directly in the Markdown
    - explain each figure in full sentences that make clear what it is, what can be observed, and what role it plays in the paper's argument
    - explain each table in full sentences that identify the comparison target, key metrics, notable results, and why they matter
+   - **rewrite every formula in LaTeX** (`$$...$$` or `$...$`) rather than embedding formula PNG screenshots — use the PNG crops in `assets/formulas/` only as a visual reference to verify LaTeX accuracy, never as the embedded representation
    - explain each formula in full sentences that identify its role, prioritize core formulas when there are many, and avoid forced interpretation when the paper does not support one
    - keep evidence anchors mainly in technical sections
    - respect asset-level uncertainty from `manifest.json`
@@ -125,6 +126,7 @@ Before finishing, confirm:
 | Asking the user for `target_language`, `paper_slug`, or `output_root` even when defaults are safe | Default `target_language` to `Chinese`, derive `paper_slug` from the PDF filename, and default the output root unless the user asks to override them. |
 | Keeping Chinese headings for every language | Localize the whole report to `target_language` unless the user asks for bilingual output. |
 | Dumping screenshots without interpretation | Every visual block needs a short explanation and its role in the argument. |
+| Embedding formula PNG screenshots instead of LaTeX | Rewrite formulas as `$$...$$` LaTeX — use PNG crops only as a reference to verify transcription accuracy. |
 | Guessing missing method or formula details | Mark uncertainty explicitly and record it in `report.json`. |
 | Writing about crop quality or extraction strategy inside the summary | Keep workflow-side issues in `report.json`; keep `summary.md` focused on the paper itself. |
 | Letting the displayed page title follow the target language | Always use the Chinese translation of the paper's English title as the displayed page title, and keep the original English title in metadata. |

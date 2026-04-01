@@ -69,7 +69,8 @@ Read the full Markdown, then select content for these cards. Each card has a **h
 
 ### Card 7: Key Equations (optional, ≤2 equations)
 - Only include if the paper is math-heavy and equations are central to understanding
-- Each equation gets a one-line plain-language explanation
+- Render each equation in LaTeX inside an `.equation-row` with a short `.eq-note` label
+- Each `.equation-row` must have a `data-detail` attribute with a detailed explanation (2–6 sentences, ≤120 words) sourced from Section 5.3 of `summary.md` — this powers the click-to-expand lightbox
 - Skip this card entirely for empirical/system papers
 
 ### Card 8: Limitations & Open Questions (≤60 words)
@@ -143,17 +144,35 @@ Add a `data-detail` attribute to each `<figure>` element. The value is a paragra
 </figure>
 ```
 
-Formula images inside `.equation-row` also support lightbox. Add `data-detail` to the `.equation-row` element.
+Formula `.equation-row` elements also support lightbox. Add `data-detail` to the `.equation-row` element with a detailed derivation or explanation (2–6 sentences, ≤120 words). The lightbox re-renders the equation at a larger size with the full explanation below.
+
+```html
+<div class="equation-row" data-detail="该公式定义了 Muon 优化器的核心更新规则。首先计算梯度动量 M_t，然后通过 Newton-Schulz 迭代对其正交化得到 O_t，最后执行权重更新。正交化步骤确保更新方向在谱范数意义下被标准化，这是 Muon 相对于 AdamW 的核心差异。">
+  <div class="math-display">$$\mathbf{W}_t = \mathbf{W}_{t-1} - \eta_t \mathbf{O}_t$$</div>
+  <div class="eq-note">Eq. 1: Muon 核心更新规则</div>
+</div>
+```
 
 ### What to include in `data-detail`
 
+For figures:
 - What the visual shows (structure, axes, comparison)
 - Key observation or takeaway
 - Role in the paper's argument
 
+For equations:
+- What the formula computes and why
+- Key variable meanings (if not obvious from the inline `eq-note`)
+- Derivation context or connection to other equations
+- Role in the paper's method or proof
+
 ### Interaction
 
-Click image → lightbox overlay (dark backdrop, centered image at `max-width: 90vw; max-height: 70vh`, explanation text below). Click backdrop or press Escape → dismiss. The CSS and JS are self-contained in the template below.
+**Figures**: Click image → lightbox overlay (dark backdrop, centered image at `max-width: 90vw; max-height: 70vh`, explanation text below). Click backdrop or press Escape → dismiss.
+
+**Equations**: Click anywhere on the `.equation-row` → lightbox overlay with the equation re-rendered at larger scale (`font-size: 1.4em`) and the full `data-detail` explanation below. Click backdrop or press Escape → dismiss.
+
+The CSS and JS are self-contained in the template below.
 
 ## Layout Specification
 
@@ -426,6 +445,13 @@ body {
   padding: 8px;
   background: white;
   border-radius: 6px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, background 0.15s;
+}
+
+.equation-row:hover {
+  box-shadow: 0 2px 8px rgba(41,98,255,0.12);
+  background: var(--accent-light);
 }
 
 .equation-row .math-display {
@@ -611,13 +637,34 @@ code {
 
 .lightbox-close:hover { opacity: 1; }
 
+.lightbox-equation {
+  background: #fff;
+  border-radius: 10px;
+  padding: 28px 36px;
+  max-width: 80vw;
+  max-height: 65vh;
+  overflow-y: auto;
+  font-size: 1.4em;
+  color: var(--text);
+  cursor: default;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  text-align: center;
+}
+
+.lightbox-equation .eq-label {
+  font-size: 0.55em;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
 @keyframes lbIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
 /* Clickable figures */
-.card figure img, .equation-row img {
+.card figure img {
   cursor: zoom-in;
 }
 
@@ -792,9 +839,14 @@ code {
     });
   })();
 
-  // --- Visual lightbox ---
+  // --- Visual & equation lightbox ---
   (function() {
-    function openLightbox(imgSrc, caption, detail) {
+    function closeLightbox() {
+      var lb = document.querySelector('.lightbox');
+      if (lb) lb.remove();
+    }
+
+    function openImageLightbox(imgSrc, caption, detail) {
       var lb = document.createElement('div');
       lb.className = 'lightbox';
       lb.innerHTML =
@@ -808,18 +860,64 @@ code {
       document.body.appendChild(lb);
     }
 
+    function openEquationLightbox(mathHtml, label, detail) {
+      var lb = document.createElement('div');
+      lb.className = 'lightbox';
+      var eqDiv = document.createElement('div');
+      eqDiv.className = 'lightbox-equation';
+      eqDiv.innerHTML =
+        (label ? '<div class="eq-label">' + label + '</div>' : '') +
+        '<div class="math-display">' + mathHtml + '</div>';
+      lb.innerHTML = '<button class="lightbox-close">&times;</button>';
+      lb.appendChild(eqDiv);
+      if (detail) {
+        var detailDiv = document.createElement('div');
+        detailDiv.className = 'lightbox-detail';
+        detailDiv.textContent = detail;
+        lb.appendChild(detailDiv);
+      }
+      lb.addEventListener('click', function(e) {
+        if (e.target === lb || e.target.classList.contains('lightbox-close')) lb.remove();
+      });
+      document.body.appendChild(lb);
+      // Re-render KaTeX inside lightbox
+      if (typeof renderMathInElement === 'function') {
+        renderMathInElement(eqDiv, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ]
+        });
+      }
+    }
+
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') { var lb = document.querySelector('.lightbox'); if (lb) lb.remove(); }
+      if (e.key === 'Escape') closeLightbox();
     });
 
     document.addEventListener('click', function(e) {
-      var img = e.target.closest('.card figure img, .equation-row img, .visuals-grid img');
-      if (!img) return;
-      e.stopPropagation();
-      var figure = img.closest('figure') || img.closest('.equation-row');
-      var caption = figure?.querySelector('figcaption, .eq-note')?.textContent || '';
-      var detail = figure?.dataset.detail || '';
-      openLightbox(img.src, caption, detail);
+      // Handle image clicks (figures, visuals)
+      var img = e.target.closest('.card figure img, .visuals-grid img');
+      if (img) {
+        e.stopPropagation();
+        var figure = img.closest('figure');
+        var caption = figure?.querySelector('figcaption')?.textContent || '';
+        var detail = figure?.dataset.detail || '';
+        openImageLightbox(img.src, caption, detail);
+        return;
+      }
+
+      // Handle equation-row clicks
+      var eqRow = e.target.closest('.equation-row');
+      if (eqRow) {
+        e.stopPropagation();
+        var mathEl = eqRow.querySelector('.math-display');
+        var mathHtml = mathEl ? mathEl.innerHTML : '';
+        var label = eqRow.querySelector('.eq-note')?.textContent || '';
+        var detail = eqRow.dataset.detail || '';
+        openEquationLightbox(mathHtml, label, detail);
+        return;
+      }
     });
   })();
   </script>
@@ -837,7 +935,9 @@ Before writing the final HTML, verify:
 - [ ] Figures are selected for information value, not completeness
 - [ ] No redundant information across cards
 - [ ] Image paths are preserved exactly as in the source Markdown
-- [ ] Math renders correctly via KaTeX delimiters
+- [ ] Equations use LaTeX (`$$...$$`) inside `.equation-row` elements, not PNG screenshots
+- [ ] Every `.equation-row` has a `data-detail` attribute with a detailed explanation (2–6 sentences) sourced from Section 5.3
+- [ ] Math renders correctly via KaTeX delimiters (both inline in cards and inside equation lightbox)
 - [ ] The brief is self-contained (no external dependencies except KaTeX CDN)
 - [ ] Every `<figure>` has a `data-detail` attribute with a 2–4 sentence explanation from the summary
 - [ ] 8–12 key technical terms are marked with `class="term"` and `data-def` explanations

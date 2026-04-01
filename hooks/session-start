@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# SessionStart hook for paperer-skill-plugin
+# Auto-detects and installs Python dependencies, then injects plugin context.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+VENV_PYTHON="${PLUGIN_ROOT}/.venv/bin/python"
+
+# ---------------------------------------------------------------------------
+# 1. Java check (detection only — installation is left to install_deps.sh)
+# ---------------------------------------------------------------------------
+
+JAVA_STATUS="unavailable"
+if command -v java &>/dev/null 2>&1; then
+  JAVA_STATUS="ready"
+fi
+
+# ---------------------------------------------------------------------------
+# 2. Python dependency check and silent auto-install
+# ---------------------------------------------------------------------------
+
+deps_check() {
+  local py="$1"
+  "$py" -c "import opendataloader_pdf; import fitz" &>/dev/null 2>&1
+}
+
+PYTHON=""
+DEPS_STATUS="unavailable"
+
+# Prefer project venv, then fall back to system python
+for candidate in "$VENV_PYTHON" python3 python; do
+  if [ -x "$candidate" ] || command -v "$candidate" &>/dev/null 2>&1; then
+    PYTHON="$candidate"
+    break
+  fi
+done
+
+if [ -n "$PYTHON" ]; then
+  if deps_check "$PYTHON"; then
+    DEPS_STATUS="ready"
+  else
+    # Silent install attempt (also handles Java via install_deps.sh)
+    if bash "${PLUGIN_ROOT}/scripts/install_deps.sh" &>/dev/null 2>&1; then
+      # Prefer freshly created venv python after install
+      if [ -x "$VENV_PYTHON" ] && deps_check "$VENV_PYTHON"; then
+        PYTHON="$VENV_PYTHON"
+        DEPS_STATUS="ready"
+      elif deps_check "$PYTHON"; then
+        DEPS_STATUS="ready"
+      else
+        DEPS_STATUS="install_failed"
+      fi
+    else
+      DEPS_STATUS="install_failed"
+    fi
+  fi
+fi
+
+# If venv exists and is ready, always prefer it
+if [ -x "$VENV_PYTHON" ] && deps_check "$VENV_PYTHON" 2>/dev/null; then
+  PYTHON="$VENV_PYTHON"
+  DEPS_STATUS="ready"
+fi
+
+# Re-check Java in case install_deps.sh just installed it
+command -v java &>/dev/null 2>&1 && JAVA_STATUS="ready"
+
+# Determine overall programmatic pipeline readiness
+if [ "$DEPS_STATUS" = "ready" ] && [ "$JAVA_STATUS" = "ready" ]; then
+  PIPELINE_STATUS="ready"
+elif [ "$DEPS_STATUS" = "ready" ] && [ "$JAVA_STATUS" != "ready" ]; then
+  PIPELINE_STATUS="degraded (Java missing — opendataloader-pdf will fail at runtime)"
+else
+  PIPELINE_STATUS="unavailable — agent-only fallback will be used"
+fi
+
+# ---------------------------------------------------------------------------
+# 3. Build context string
+# ---------------------------------------------------------------------------
+
+context="<paperer-plugin-context>
+plugin_root: ${PLUGIN_ROOT}
+python_executable: ${PYTHON:-none}
+extraction_deps (opendataloader-pdf + pymupdf): ${DEPS_STATUS}
+java: ${JAVA_STATUS}
+programmatic_pipeline: ${PIPELINE_STATUS}
+extraction_script: ${PLUGIN_ROOT}/scripts/extract_assets.py
+default_run_cmd: ${PYTHON:-python3} ${PLUGIN_ROOT}/scripts/extract_assets.py <paper.pdf>
+
+notes:
+- hybrid mode (docling-fast) is enabled by default for better formula/table detection
+- use --no-hybrid to run in local-only mode if the hybrid server is unavailable
+- hybrid server: opendataloader-pdf-hybrid --port 5002
+- if programmatic_pipeline is not ready, use the agent-only fallback path
+- Java 11+ is required by opendataloader-pdf at runtime even when the import succeeds
+</paperer-plugin-context>"
+
+# ---------------------------------------------------------------------------
+# 4. JSON-escape helper (no subshell, single-pass substitutions)
+# ---------------------------------------------------------------------------
+
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+context_escaped=$(escape_for_json "$context")
+
+# ---------------------------------------------------------------------------
+# 5. Emit platform-appropriate JSON
+# ---------------------------------------------------------------------------
+# Cursor consumes top-level "additional_context".
+# Claude Code and Codex both consume "hookSpecificOutput.additionalContext".
+
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{"additional_context": "%s"}\n' "$context_escaped"
+else
+  printf '{"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "%s"}}\n' "$context_escaped"
+fi
+
+exit 0

@@ -1,8 +1,24 @@
 # Extraction Policy
 
-Use a fixed two-pass extraction flow.
+Use the programmatic pipeline when available, then finish with an agent review pass.
 
-## Pass 1: Candidate Collection
+## Pass 0: Programmatic Detection (preferred)
+
+When `scripts/extract_assets.py` is available, run it first:
+
+```
+python scripts/extract_assets.py <paper.pdf> --output-root <output_root> --paper-slug <slug>
+```
+
+The script uses OpenDataLoader PDF for element detection and pymupdf for cropping. It produces `assets/*`, `manifest.json`, and `extracted/asset-extraction-report.json`.
+
+After the script finishes, skip Pass 1 and go directly to Pass 2 (agent review).
+
+Hybrid mode (`docling-fast`) is **enabled by default** for better formula and complex-table detection. If the `opendataloader-pdf-hybrid` server is not running, the script falls back to local mode automatically. Use `--no-hybrid` to force local-only processing.
+
+If the script is unavailable or fails entirely, fall back to the full agent-driven Pass 1 below.
+
+## Pass 1: Candidate Collection (agent fallback)
 
 Collect all plausible candidates for:
 
@@ -20,7 +36,9 @@ At this stage:
 
 ## Pass 2: Review And Normalization
 
-For every candidate:
+When Pass 0 was used, this pass operates on the script's output rather than raw candidates. Focus on verification and correction rather than initial detection.
+
+For every candidate (or every script-produced asset):
 
 - classify as `figure`, `table`, `formula`, or `uncertain`
 - merge obvious duplicates

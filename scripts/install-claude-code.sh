@@ -14,5 +14,8 @@ ln -sfn "$COMMAND_FILE" "$HOME/.claude/commands/paperer.md"
 ln -sfn "$AGENT_FILE" "$HOME/.claude/agents/paperer.md"
 
 echo "Installed Claude Code wrappers and skills."
+
+"$SCRIPT_DIR/install_deps.sh"
+
 echo "Restart Claude Code to discover /paperer and the local paperer agent."
 

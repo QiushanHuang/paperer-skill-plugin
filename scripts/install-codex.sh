@@ -10,5 +10,8 @@ mkdir -p "$HOME/.agents/skills"
 ln -sfn "$SKILLS_DIR" "$TARGET_DIR"
 
 echo "Installed Codex skills at $TARGET_DIR"
+
+"$SCRIPT_DIR/install_deps.sh"
+
 echo "Restart Codex to discover Paperer."
 

@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "SKILLS_LINK=\"$HOME/.agents/skills/paperer-skill-plugin\"; if [ -L \"$SKILLS_LINK\" ]; then PLUGIN_ROOT=\"$(cd \"$(readlink \"$SKILLS_LINK\")/../..\" 2>/dev/null && pwd)\"; else PLUGIN_ROOT=\"$HOME/plugins/paperer-skill-plugin\"; fi; [ -x \"${PLUGIN_ROOT}/hooks/session-start\" ] && exec \"${PLUGIN_ROOT}/hooks/session-start\" || exit 0",
+            "statusMessage": "Checking Paperer dependencies"
+          }
+        ]
+      }
+    ]
+  }
+}

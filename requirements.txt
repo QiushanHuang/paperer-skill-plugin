@@ -1,0 +1,2 @@
+opendataloader-pdf>=2.0
+pymupdf>=1.24

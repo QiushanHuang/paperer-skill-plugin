@@ -35,7 +35,57 @@ Optional:
 - `paper_slug`
 - output root path
 
+## Dependency Preflight
+
+Before choosing the preferred (programmatic) or fallback (agent-only) path, check whether the programmatic pipeline is available.
+
+Determine the Python executable to use (check in this order):
+
+1. If `.venv/bin/python` exists relative to the repo root, use it.
+2. Otherwise use whichever `python3` or `python` is on PATH.
+
+Then run:
+
+```
+<python> -c "import opendataloader_pdf; import fitz; print('deps ok')"
+```
+
+- If it prints `deps ok`, use the **preferred path** below. Use the same `<python>` to invoke `scripts/extract_assets.py`.
+- If it fails, try `bash scripts/install_deps.sh` (from the repo root) and re-check.
+- If installation fails or Java 11+ is unavailable (`java -version`), use the **fallback path**.
+
+Do not ask the user to install dependencies interactively. Attempt the check, attempt the install, and fall back silently if neither works.
+
 ## Workflow
+
+### Preferred path: programmatic extraction via OpenDataLoader PDF
+
+When `scripts/extract_assets.py` and its dependencies (`opendataloader-pdf`, `pymupdf`) are available, use the programmatic pipeline as **Pass 0** before the agent review passes.
+
+1. Run the extraction script (use `.venv/bin/python` when the project venv exists):
+   ```
+   .venv/bin/python scripts/extract_assets.py <paper.pdf> --output-root <output_root> --paper-slug <slug>
+   ```
+   Hybrid mode (`docling-fast`) is **enabled by default** for better formula and complex-table detection. If the hybrid server (`opendataloader-pdf-hybrid --port 5002`) is not running, the script falls back to local mode automatically. Use `--no-hybrid` to force local-only processing.
+
+2. The script produces:
+   - `assets/header/paper-header.png`
+   - `assets/figures/fig-*.png`
+   - `assets/tables/table-*.png`
+   - `assets/formulas/formula-*.png`
+   - `manifest.json`
+   - `extracted/asset-extraction-report.json`
+
+3. After the script completes, run an **agent review pass** (see [references/extraction-policy.md](references/extraction-policy.md) Pass 2) to:
+   - verify numbering continuity against the actual paper
+   - split any mixed-type crops the script may have missed
+   - add or correct `quality_flags` based on visual inspection
+   - look for assets the script missed (especially code-as-figure blocks or unnumbered diagrams)
+   - update `manifest.json` and `extracted/asset-extraction-report.json` if changes were made
+
+### Fallback path: agent-only extraction
+
+When the programmatic pipeline is unavailable, fall back to the full agent-driven workflow:
 
 1. Build page-level visual context using the available PDF-reading and screenshotting capabilities.
    Prefer the installed `pdf` skill or equivalent tooling to inspect layout, captions, and visible display blocks.
@@ -48,6 +98,8 @@ Optional:
    - `assets/figures/`
    - `assets/tables/`
    - `assets/formulas/`
+
+### Common finishing steps (both paths)
 
 4. Write `manifest.json` using [references/manifest-schema.md](references/manifest-schema.md).
 
@@ -103,3 +155,5 @@ Before finishing, confirm:
 | Emitting assets without a manifest | `manifest.json` is required for downstream use. |
 | Letting file ids drift away from the paper numbering | If the paper says `Fig. 7`, the emitted file should be `fig-007.*`. |
 | Keeping one crop that contains both a figure and a table | Split them into separate assets and review the numbering again. |
+| Skipping the agent review after programmatic extraction | The script handles detection and cropping, but the agent must still verify numbering, split mixed crops, and catch missed assets. |
+| Running the script without checking its output | Always read `manifest.json` and the extraction report before writing the summary. |

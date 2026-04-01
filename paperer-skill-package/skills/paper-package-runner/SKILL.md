@@ -47,6 +47,7 @@ Before asking the user anything beyond the PDF path:
    - `paper-package-runner`
    - `literature-summary`
    - `paper-asset-extraction`
+   - `publish`
 2. If the skills are already available, do not fetch anything.
 3. If the skills are not available, obtain only the minimal `Paperer` skill package directory:
    - GitHub directory:
@@ -93,9 +94,14 @@ After preflight and intake:
 2. Require `literature-summary` to prefer `paper-asset-extraction` as the visual-asset pipeline.
 3. Let `literature-summary` produce the final paper package under:
    - `output/papers/<paper-slug>/`
-4. Return:
+4. After `literature-summary` completes successfully and `summary.md` exists, call `publish` on the generated `summary.md` to produce a Distill.pub-style HTML report.
+   - Input: `output/papers/<paper-slug>/summary.md`
+   - Output: `output/papers/<paper-slug>/summary-report.html`
+   - If `publish` fails or is unavailable, the run still counts as `complete` — the HTML report is a best-effort post-processing step. Record the failure in `report.json`.
+5. Return:
    - the output directory path
    - the path to `summary.md`
+   - the path to `summary-report.html` when present
    - the path to `report.json`
    - the path to `manifest.json` when present
    - the final status: `complete`, `partial`, or `failed`
@@ -108,6 +114,7 @@ The production flow should be treated as:
 paper-package-runner
   -> literature-summary
      -> paper-asset-extraction
+  -> publish (summary.md -> summary-report.html)
   -> output/papers/<paper-slug>/
 ```
 
@@ -118,6 +125,7 @@ It must not:
 - rewrite the summary itself
 - extract figures, tables, or formulas itself
 - redefine the output schema already owned by `literature-summary`
+- re-implement Markdown-to-HTML conversion logic already owned by `publish`
 
 ## Quick Reference
 
@@ -126,12 +134,13 @@ It must not:
 - Thin orchestration skill: `paper-package-runner`
 - Main brief-writing skill: `literature-summary`
 - Preferred visual-asset skill: `paper-asset-extraction`
+- HTML report skill: `publish`
 - Required user input: `paper_pdf_path`
 - Defaulted by the skill: `target_language=Chinese`
 - Derived by default: `paper_slug`, `output_root`
 - Default output path: `output/papers/<paper-slug>/`
 - Preferred install target on a fresh machine: `paperer-skill-package/`
-- Built-in return contract: output directory, `summary.md`, `report.json`, `manifest.json` when present, and final status
+- Built-in return contract: output directory, `summary.md`, `summary-report.html` when present, `report.json`, `manifest.json` when present, and final status
 
 ## Common Mistakes
 

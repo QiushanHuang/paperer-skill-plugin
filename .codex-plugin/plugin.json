@@ -16,6 +16,7 @@
     "pdf"
   ],
   "skills": "./paperer-skill-package/skills/",
+  "hooks": "./hooks/codex-hooks.json",
   "interface": {
     "displayName": "Paperer",
     "shortDescription": "Generate paper packages from readable research PDFs",

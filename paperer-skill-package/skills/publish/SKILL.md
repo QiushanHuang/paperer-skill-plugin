@@ -199,13 +199,24 @@ The layout is a **responsive card grid**, not a linear article.
 
 All cards stack vertically. Key Visuals becomes a vertical list.
 
+## Strict Template Compliance
+
+The CSS and JavaScript in this document are **canonical**. When generating the HTML file you MUST:
+
+- **Copy the CSS verbatim** from the CSS Template section below. Do not change CSS variable values (e.g., `--bg` must be `#ffffff`, not `#f5f5f7`), do not add `box-shadow`, gradients, or any custom styling to cards, headers, or bottomline. Do not add extra responsive rules. The CSS is final.
+- **Copy the JavaScript verbatim** from the HTML Template Structure section below — including the full equation lightbox that re-renders LaTeX via `renderMathInElement`, not the simplified image-based fallback. Do not simplify, merge, or rewrite any JS function.
+- **Use the exact HTML structure** defined in the template: same class names, same nesting, same card order. Card labels follow the language rule (match `summary.md` language), but HTML structure and CSS classes must not change.
+- **Do not add** any HTML elements, CSS rules, or JS code that are not in this document. "Creative improvements" to the template are bugs, not features.
+
+If you find yourself writing CSS or JS that differs from what is specified below — stop, re-read the template, and use the canonical version.
+
 ## Instructions
 
 1. Read the Markdown file
 2. Determine the output path: same directory, `<basename>-report.html`
 3. **Analyze the content** — identify the most important information for each card
 4. **Curate ruthlessly** — apply the word budgets, drop low-value content
-5. Generate the HTML following the template and CSS below
+5. Generate the HTML using **exactly** the CSS and JS from this document — do not improvise
 6. Write the HTML file
 7. Tell the user the output path
 
@@ -942,3 +953,14 @@ Before writing the final HTML, verify:
 - [ ] Every `<figure>` has a `data-detail` attribute with a 2–4 sentence explanation from the summary
 - [ ] 8–12 key technical terms are marked with `class="term"` and `data-def` explanations
 - [ ] Term definitions are ≤30 words and written in plain language matching `target_language`
+
+### Template Compliance Checklist
+
+- [ ] CSS `:root` variables match the canonical values exactly (`--bg: #ffffff`, `--card-bg: #f8f9fa`, etc.)
+- [ ] No extra `box-shadow`, `gradient`, or custom styling was added to any element
+- [ ] `.equation-row` has `cursor: pointer` and `:hover` styles from the canonical CSS
+- [ ] The equation lightbox JS uses `openEquationLightbox` with LaTeX re-rendering via `renderMathInElement` — NOT an image-based fallback
+- [ ] The figure lightbox JS uses `openImageLightbox` as a separate function from the equation lightbox
+- [ ] `.equation-row` click handler does NOT check for `data-img` — it reads `.math-display` innerHTML and re-renders
+- [ ] No JS functions were merged, simplified, or rewritten
+- [ ] Card 9 (Paper Ratings) uses the `.rating-row` structure from the template when `report.json` ratings are available

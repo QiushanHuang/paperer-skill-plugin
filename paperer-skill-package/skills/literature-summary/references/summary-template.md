@@ -10,7 +10,7 @@ The headings must be localized to `target_language`. The Chinese labels below de
 - Prefer short paragraphs over bullet dumps where explanation matters.
 - Keep a stable heading hierarchy.
 - Use evidence anchors mainly in technical sections.
-- Avoid ratings. Make judgment in prose.
+- Express analytical judgment in prose within the body sections. Additionally, include a structured AI ratings table in Section 9.
 - When extraction is partial, keep the document polished and mark missing support clearly.
 - Keep the prose focused on the paper itself. Do not discuss extraction strategy, crop quality, or other workflow-side details inside `summary.md`.
 - Every header image, figure, table, and formula that exists in the bundle must be embedded visibly inside `summary.md`.
@@ -176,11 +176,33 @@ Do not summarize extraction problems here. If the bundle has extraction uncertai
 
 - Close with one natural, precise, and defensible sentence.
 
-## Paper Ratings
+### 9. AI 评分
 
-After completing the summary, produce a structured rating for the paper across five dimensions. Each rating is an integer from 1 to 5. Each rating must include a one-sentence justification grounded in the paper's actual content — do not repeat generic praise or criticism.
+Include a ratings section at the end of `summary.md` that presents the five-dimension evaluation inline. This gives readers an at-a-glance quality signal directly in the markdown, without needing to open `report.json` or the HTML report.
 
-Write the ratings into `report.json` under the `ratings` key. Do not include the ratings in `summary.md` itself — they are structured data for downstream consumption (e.g., publish skill, recommendation system).
+#### Format
+
+Use a table with dimension name, score (as filled/empty dots: ● for filled, ○ for empty, 5 total), and a one-sentence justification:
+
+```markdown
+### 9. AI 评分
+
+| 维度 | 评分 | 说明 |
+|------|------|------|
+| 创新性 | ●●●○○ | One-sentence justification grounded in paper content |
+| 严谨性 | ●●●●○ | ... |
+| 实用性 | ●●●●● | ... |
+| 清晰度 | ●●●●○ | ... |
+| 影响力 | ●●●●○ | ... |
+```
+
+- Localize dimension names and justifications to `target_language`.
+- The justifications in the markdown table must match those written to `report.json`.
+- Do not add editorial commentary beyond the table — the justifications speak for themselves.
+
+## Paper Ratings (report.json)
+
+In addition to the markdown table above, write the same ratings into `report.json` under the `ratings` key. The `report.json` version is structured data for downstream consumption (publish skill, dashboard, recommendation system).
 
 ### Dimensions
 

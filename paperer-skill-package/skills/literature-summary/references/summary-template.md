@@ -176,33 +176,11 @@ Do not summarize extraction problems here. If the bundle has extraction uncertai
 
 - Close with one natural, precise, and defensible sentence.
 
-### 9. AI 评分
-
-Include a ratings section at the end of `summary.md` that presents the five-dimension evaluation inline. This gives readers an at-a-glance quality signal directly in the markdown, without needing to open `report.json` or the HTML report.
-
-#### Format
-
-Use a table with dimension name, score (as filled/empty dots: ● for filled, ○ for empty, 5 total), and a one-sentence justification:
-
-```markdown
-### 9. AI 评分
-
-| 维度 | 评分 | 说明 |
-|------|------|------|
-| 创新性 | ●●●○○ | One-sentence justification grounded in paper content |
-| 严谨性 | ●●●●○ | ... |
-| 实用性 | ●●●●● | ... |
-| 清晰度 | ●●●●○ | ... |
-| 影响力 | ●●●●○ | ... |
-```
-
-- Localize dimension names and justifications to `target_language`.
-- The justifications in the markdown table must match those written to `report.json`.
-- Do not add editorial commentary beyond the table — the justifications speak for themselves.
+Do not add a standalone AI ratings section to `summary.md`. The markdown ends after Section 8. Keep ratings only in `report.json` so downstream rendering has a single structured source.
 
 ## Paper Ratings (report.json)
 
-In addition to the markdown table above, write the same ratings into `report.json` under the `ratings` key. The `report.json` version is structured data for downstream consumption (publish skill, dashboard, recommendation system).
+Write the five-dimension ratings only into `report.json` under the `ratings` key. `report.json` is the single structured source consumed by the brief page and the daily dashboard.
 
 ### Dimensions
 

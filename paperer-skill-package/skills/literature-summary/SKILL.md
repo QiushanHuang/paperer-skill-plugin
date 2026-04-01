@@ -95,7 +95,7 @@ If this skill is called from `paper-package-runner`, accept the wrapper's derive
 - Prefer `paper-asset-extraction` for figures, tables, and formulas.
 - If `manifest.json` exists, trust its asset paths, types, page numbers, and flags.
 - Do not keep Chinese headings when the selected language is not Chinese.
-- Include the AI ratings table (Section 9) at the end of `summary.md` — scores and justifications must match `report.json`.
+- Keep `summary.md` focused on the paper content itself; write ratings only to `report.json`, not into the markdown body.
 - Technical sections should include page, figure, table, or equation anchors when available.
 - Every figure, table, and formula block must be embedded and explained in complete prose, not labeled QA bullets.
 - `summary.md` should not talk about crop choices, screenshot quality, or similar process-side issues.
@@ -115,7 +115,7 @@ Before finishing, confirm:
 - manifest-level quality flags are reflected in the prose and `report.json`
 - extraction-process details stay in `report.json`, not in the main summary prose
 - `report.json` matches the actual completeness of the bundle
-- `summary.md` includes the AI ratings table (Section 9) with scores and justifications matching `report.json`
+- `summary.md` does not contain a separate AI ratings section
 - `summary.md` uses standard Markdown syntax (headings, images, footnotes, math delimiters) so that the downstream `publish` skill can convert it cleanly into an HTML report
 
 ## Common Mistakes
@@ -128,7 +128,7 @@ Before finishing, confirm:
 | Keeping Chinese headings for every language | Localize the whole report to `target_language` unless the user asks for bilingual output. |
 | Dumping screenshots without interpretation | Every visual block needs a short explanation and its role in the argument. |
 | Embedding formula PNG screenshots instead of LaTeX | Rewrite formulas as `$$...$$` LaTeX — use PNG crops only as a reference to verify transcription accuracy. |
-| Omitting the AI ratings table from `summary.md` | Include Section 9 with the five-dimension ratings table; scores and justifications must match `report.json`. |
+| Writing the AI ratings back into `summary.md` | Keep ratings only in `report.json`; `summary.md` should remain content-only. |
 | Guessing missing method or formula details | Mark uncertainty explicitly and record it in `report.json`. |
 | Writing about crop quality or extraction strategy inside the summary | Keep workflow-side issues in `report.json`; keep `summary.md` focused on the paper itself. |
 | Letting the displayed page title follow the target language | Always use the Chinese translation of the paper's English title as the displayed page title, and keep the original English title in metadata. |

@@ -15,7 +15,16 @@ Read the file using the Read tool. Note the directory path — the output HTML w
 
 ## Output
 
-Write a single self-contained HTML file to the same directory as the input: `<input-name>-report.html`.
+When the input is `summary.md`, write two self-contained HTML files to the same directory:
+
+- `summary-report.html` — the compact brief page
+- `summary.html` — the reading page
+
+`summary-report.html` must render ratings only from `report.json`. `summary.html` must not display a ratings section.
+
+Hard rule:
+- `summary-report.html` must render ratings only from `report.json`
+- `summary.html` must not display a ratings section
 
 ## Core Principle: Curate, Don't Convert
 
@@ -84,6 +93,8 @@ Read the full Markdown, then select content for these cards. Each card has a **h
 - Each dimension shows: Chinese label, score (1–5 as filled/empty dots or stars), and one-sentence justification
 - Dimensions: 创新性, 严谨性, 实用性, 清晰度, 影响力
 - If `ratings` is absent from `report.json`, skip this card
+- This card appears only in `summary-report.html`
+- `summary.md` must not be used as a fallback source for ratings
 
 ### Card 10: Bottom Line (≤30 words)
 - Sourced from 一句话总结 (Section 8.2)
@@ -173,6 +184,10 @@ For equations:
 **Equations**: Click anywhere on the `.equation-row` → lightbox overlay with the equation re-rendered at larger scale (`font-size: 1.4em`) and the full `data-detail` explanation below. Click backdrop or press Escape → dismiss.
 
 The CSS and JS are self-contained in the template below.
+
+## Reading Page Rule
+
+`summary.html` is the reading view. It may keep the glossary, lightbox, and compact image behavior, but it must not display a ratings section. Ratings belong only to `summary-report.html`, and `summary-report.html` must render ratings only from `report.json`.
 
 ## Layout Specification
 

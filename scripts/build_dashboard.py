@@ -20,6 +20,27 @@ DIMS = [
 ]
 
 
+def parse_rating_score(value: object) -> int:
+    if isinstance(value, bool):
+        return 0
+    if isinstance(value, int):
+        return max(value, 0)
+    if isinstance(value, float):
+        return max(int(value), 0)
+    text = str(value).strip()
+    if not text:
+        return 0
+    digits = "".join(ch for ch in text if ch.isdigit())
+    if digits:
+        return max(int(digits), 0)
+    return 0
+
+
+def ten_point_score(score: object) -> str:
+    bounded = min(parse_rating_score(score), 5)
+    return f"{bounded * 2}/10"
+
+
 DASHBOARD_CSS = """\
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -155,8 +176,16 @@ body {
 
 .ratings-row {
   display: flex;
+  align-items: stretch;
   gap: 6px;
   margin-bottom: 12px;
+}
+
+.ratings-label {
+  font-size: 0.74em;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
 }
 
 .rating-badge {
@@ -368,20 +397,24 @@ def render_card(paper: dict) -> str:
 
     # Ratings
     ratings = paper.get("ratings", {})
+    ratings_label = '<div class="ratings-label">AI评分</div>'
     if ratings:
         badges = []
         for key, label in DIMS:
             entry = ratings.get(key, {})
-            score = entry.get("score", "\u2014") if isinstance(entry, dict) else "\u2014"
+            score = entry.get("score", 0) if isinstance(entry, dict) else 0
             badges.append(
                 f'<div class="rating-badge">'
-                f'<div class="score">{score}</div>'
+                f'<div class="score">{ten_point_score(score)}</div>'
                 f'<div class="dim">{label}</div>'
                 f'</div>'
             )
-        ratings_html = f'<div class="ratings-row">{"".join(badges)}</div>'
+        ratings_html = ratings_label + f'<div class="ratings-row">{"".join(badges)}</div>'
     else:
-        ratings_html = '<div class="ratings-row" style="color:var(--text-muted);font-size:0.8em;">\u672a\u8bc4\u5206</div>'
+        ratings_html = (
+            ratings_label
+            + '<div class="ratings-row" style="color:var(--text-muted);font-size:0.8em;">\u672a\u8bc4\u5206</div>'
+        )
 
     # Link
     if paper["has_report"]:

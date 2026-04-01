@@ -97,12 +97,15 @@ After preflight and intake:
 4. After `literature-summary` completes successfully and `summary.md` exists, call `publish` on the generated `summary.md` to produce a Distill.pub-style HTML report.
    - Input: `output/papers/<paper-slug>/summary.md`
    - Output: `output/papers/<paper-slug>/summary-report.html`
+   - Output: `output/papers/<paper-slug>/summary.html`
    - If `publish` fails or is unavailable, the run still counts as `complete` — the HTML report is a best-effort post-processing step. Record the failure in `report.json`.
 5. After publish completes (whether it succeeded or not), rebuild the daily dashboard:
    - Run: `python scripts/build_dashboard.py --output-root <output_root_parent>`
      - `<output_root_parent>` is the parent of `papers/` — typically `output/`.
      - If the script is not found at `scripts/build_dashboard.py`, try the path relative to the skill package root: `../../scripts/build_dashboard.py`.
    - This regenerates `output/daily/*.html` and `output/index.html` so the new paper appears immediately.
+   - The daily dashboard must read ratings only from `report.json` so it stays aligned with `summary-report.html`.
+   - `summary.html` must omit ratings.
    - If the dashboard rebuild fails, the run still counts as `complete` — dashboard is best-effort. Log a warning but do not fail the run.
 6. Return:
    - the output directory path

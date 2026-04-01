@@ -10,6 +10,15 @@ platform-specific wrapper files needed to make the package easy to install in:
 - Claude Code
 - OpenCode
 
+All bundled install scripts call `scripts/install_deps.sh`, which now:
+
+- installs the `docling-fast` hybrid extras via `opendataloader-pdf[hybrid]`
+- pre-downloads the EasyOCR models that hybrid mode fetches on first use
+- keeps Java setup in the same install flow
+
+The first install therefore needs internet access once, during environment
+setup, instead of failing later on the first hybrid extraction request.
+
 ## Repository layout
 
 - `paperer-skill-package/`
@@ -54,6 +63,8 @@ This installs:
 - the bundled skills into `~/.claude/skills/paperer-skill-plugin`
 - `/paperer` as a slash command
 - `paperer` as a local Claude agent wrapper
+- Python and Java extraction dependencies
+- the EasyOCR model cache used by `docling-fast`
 
 ## Source of truth
 
@@ -75,4 +86,3 @@ Run:
 If no path is provided, the script defaults to:
 
 `/Users/joshua/LLM_Qiushan/skill_paper_slide`
-

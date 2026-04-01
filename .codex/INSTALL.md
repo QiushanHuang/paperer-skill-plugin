@@ -23,11 +23,15 @@ The practical Codex installation path today is native skill discovery.
    ln -sfn ~/plugins/paperer-skill-plugin/paperer-skill-package/skills ~/.agents/skills/paperer-skill-plugin
    ```
 
-3. Install Python dependencies and Java (runs once, idempotent):
+3. Install Python dependencies, hybrid extras, Java, and pre-download the
+   EasyOCR models used by `docling-fast` (runs once, idempotent):
 
    ```bash
    bash ~/plugins/paperer-skill-plugin/scripts/install_deps.sh
    ```
+
+   This step needs internet access the first time so hybrid mode is ready
+   before your first extraction request.
 
 4. Enable hooks in Codex (for automatic dependency detection on session start):
 
@@ -75,6 +79,9 @@ Preflight section that performs the same checks at runtime.
   pointing to `hooks/codex-hooks.json` for plugin-oriented installs.
 - The skill source of truth remains `paperer-skill-package/`.
 - Hybrid mode (`docling-fast`) is enabled by default for better formula and
-  table detection. The script falls back to local mode automatically if the
+  table detection.
+- `scripts/install_deps.sh` installs `opendataloader-pdf[hybrid]` and
+  pre-downloads EasyOCR models up front so the first hybrid run does not need
+  to fetch them lazily.
+- The extraction script still falls back to local mode automatically if the
   hybrid server is not running.
-

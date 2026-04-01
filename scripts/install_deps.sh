@@ -29,11 +29,29 @@ if [ -z "$PYTHON" ]; then
 fi
 
 VENV_DIR="$REPO_ROOT/.venv"
+INSTALL_PYTHON=""
+INSTALL_PIP=""
 
 # If already inside a venv, install directly
 if [ -n "${VIRTUAL_ENV:-}" ]; then
   echo "Installing Python dependencies into active venv ($VIRTUAL_ENV) …"
-  pip install -r "$REQ_FILE" && {
+  INSTALL_PYTHON="${VIRTUAL_ENV}/bin/python"
+  INSTALL_PIP="${VIRTUAL_ENV}/bin/pip"
+
+  if [ ! -x "$INSTALL_PYTHON" ]; then
+    INSTALL_PYTHON="$PYTHON"
+  fi
+
+  if [ ! -x "$INSTALL_PIP" ]; then
+    if command -v pip &>/dev/null; then
+      INSTALL_PIP="$(command -v pip)"
+    else
+      echo "WARNING: pip not found in active venv."
+      exit 0
+    fi
+  fi
+
+  "$INSTALL_PIP" install -r "$REQ_FILE" && {
     echo "Python dependencies installed successfully."
   } || {
     echo "WARNING: pip install failed inside venv."
@@ -47,7 +65,10 @@ else
   fi
 
   echo "Installing Python dependencies into $VENV_DIR …"
-  "$VENV_DIR/bin/pip" install -r "$REQ_FILE" && {
+  INSTALL_PYTHON="$VENV_DIR/bin/python"
+  INSTALL_PIP="$VENV_DIR/bin/pip"
+
+  "$INSTALL_PIP" install -r "$REQ_FILE" && {
     echo "Python dependencies installed successfully."
   } || {
     echo "WARNING: pip install failed. You can retry manually:"
@@ -61,6 +82,26 @@ else
   echo ""
   echo "Or activate the venv first:"
   echo "  source $VENV_DIR/bin/activate"
+fi
+
+HYBRID_READY=0
+echo "Installing hybrid extras for docling-fast …"
+"$INSTALL_PIP" install "opendataloader-pdf[hybrid]>=2.0" && {
+  echo "Hybrid extras installed successfully."
+  HYBRID_READY=1
+} || {
+  echo "WARNING: hybrid dependency install failed."
+  echo "Hybrid mode may fall back to local processing until this succeeds."
+}
+
+if [ "$HYBRID_READY" = "1" ]; then
+  echo "Pre-downloading EasyOCR models for hybrid mode …"
+  if "$INSTALL_PYTHON" "$REPO_ROOT/scripts/warmup_hybrid_models.py"; then
+    echo "Hybrid OCR models are cached locally."
+  else
+    echo "WARNING: hybrid model warmup failed."
+    echo "The first docling-fast run may still need network access."
+  fi
 fi
 
 # Verify or install Java (required by opendataloader-pdf)
